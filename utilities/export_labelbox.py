@@ -1,3 +1,6 @@
+# This script exports labeled data from a Labelbox project, downloading images and masks, 
+# combining masks with specified colors, and saving them to a local directory.
+
 import os, json, io, concurrent.futures as cf
 import labelbox as lb
 from PIL import Image
@@ -11,6 +14,7 @@ from PIL import Image, ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def make_http_session():
+    """Create a requests session with retry logic."""
     sess = requests.Session()
     retries = Retry(
         total=5, connect=3, read=3, backoff_factor=0.3,
@@ -22,7 +26,7 @@ def make_http_session():
     return sess
 
 def download_image(url, headers=None, timeout=10, session=None):
-    """Tải ảnh bằng requests, trả về PIL.Image hoặc None."""
+    """Download an image from a URL with error handling."""
     s = session or make_http_session()
     try:
         r = s.get(url, headers=headers or {}, timeout=timeout)
@@ -36,7 +40,7 @@ def download_image(url, headers=None, timeout=10, session=None):
         print(f"Unknown Error: {e} for URL: {url}")
     return None
 def _mask_to_bool(mask_img, target_size):
-    """Đưa mask về nhị phân bool với kích thước ảnh gốc."""
+    """ Combine masks to a single boolean mask."""
     if mask_img.mode not in ("1", "L"):
         # nếu có alpha channel, ưu tiên alpha làm mask
         if "A" in mask_img.getbands():
@@ -57,7 +61,7 @@ def export_labelbox_data(
     label_colors,
     max_workers=6
 ):
-    """Export + combine colored masks nhanh & ổn định hơn."""
+    """Export + combine colored masks from Labelbox project"""
     # Labelbox client
     client = lb.Client(api_key=api_key)
 
@@ -125,18 +129,23 @@ def export_labelbox_data(
         # lưu file
         ext_id = item["data_row"]["external_id"]
         base_path = os.path.join(IMAGE_DIR, f"{ext_id}")
-        mask_path = os.path.join(MASK_DIR,  f"masks_{ext_id}")
+        mask_path = os.path.join(MASK_DIR,  f"{ext_id}")
 
         base_image.save(base_path)
         Image.fromarray(mask_combined, mode="RGB").save(mask_path)
 
 if __name__ == "__main__":
-    with open('token.json','r') as f:
+    
+    root_dir = "D:\OneDrive\WORKING\Projects\CellDetection\Code\Mourincells"
+    data_dir = os.path.join(root_dir, "data")
+    labelbox_dir = os.path.join(root_dir, "labelbox") 
+    token_path = os.path.join(labelbox_dir, "token.json")
+
+    with open(token_path,'r') as f:
         token_data = json.load(f)
         API_KEY = token_data['api_key']
         PROJECT_ID = token_data['project_id']
 
-    data_dir = "data"
 
     # defind export parameters of labelbox
     export_params = {
