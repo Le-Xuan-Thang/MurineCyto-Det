@@ -39,6 +39,7 @@ def download_image(url, headers=None, timeout=10, session=None):
     except Exception as e:
         print(f"Unknown Error: {e} for URL: {url}")
     return None
+
 def _mask_to_bool(mask_img, target_size):
     """ Combine masks to a single boolean mask."""
     if mask_img.mode not in ("1", "L"):
@@ -85,7 +86,7 @@ def export_labelbox_data(
     # HTTP session (reuse + retry)
     session = make_http_session()
 
-    for item in tqdm(data, total=len(data), desc="Images", unit="img"):
+    for idx, item in enumerate(tqdm(data, total=len(data), desc="Images", unit="img"), start=1):
         # ảnh gốc
         image_url = item["data_row"]["row_data"]
         base_image = download_image(image_url, session=session)
@@ -128,15 +129,16 @@ def export_labelbox_data(
 
         # lưu file
         ext_id = item["data_row"]["external_id"]
-        base_path = os.path.join(IMAGE_DIR, f"{ext_id}")
-        mask_path = os.path.join(MASK_DIR,  f"{ext_id}")
+        file_name = ext_id.split('.')[0] + f"_{idx}." + ext_id.split('.')[1]
+        base_path = os.path.join(IMAGE_DIR, f"{file_name}")
+        mask_path = os.path.join(MASK_DIR,  f"{file_name}")
 
         base_image.save(base_path)
         Image.fromarray(mask_combined, mode="RGB").save(mask_path)
 
 if __name__ == "__main__":
     
-    root_dir = "D:\OneDrive\WORKING\Projects\CellDetection\Code\Mourincells"
+    root_dir = "/Users/lexuanthang/OneDrive/WORKING/Projects/CellDetection/Code/Mourincells/"
     data_dir = os.path.join(root_dir, "data")
     labelbox_dir = os.path.join(root_dir, "labelbox") 
     token_path = os.path.join(labelbox_dir, "token.json")

@@ -1,4 +1,4 @@
-import os, json, io
+import os, json, concurrent.futures as cf
 import labelbox as lb
 import numpy as np
 from PIL import Image
@@ -6,7 +6,6 @@ import cv2
 from datetime import datetime
 from tqdm.auto import tqdm
 from export_labelbox import make_http_session, download_image
-import matplotlib.pyplot as plt
 
 # Define coco format
 coco_data = {}
@@ -54,7 +53,14 @@ coco_data = {
             "id": 5,
             "name": "Unknown cell/Debris",
             "supercategory": "mourin_cells"
-        }
+        },
+        {
+            "id": 6,
+            "name": "Basophil",
+            "supercategory": "mourin_cells"
+        },
+
+
     ],
     
     # Empty lists for images and annotations - will be populated dynamically 
@@ -64,7 +70,7 @@ coco_data = {
 
 # Step 2: data from Labelbox
 # get all file names in data/images directory
-root_dir = "D:\OneDrive\WORKING\Projects\CellDetection\Code\Mourincells"
+root_dir = "/Users/lexuanthang/OneDrive/WORKING/Projects/CellDetection/Code/Mourincells"
 data_dir = os.path.join(root_dir, "data")
 labelbox_dir = os.path.join(root_dir, "labelbox") 
 token_path = os.path.join(labelbox_dir, "token.json")
@@ -135,23 +141,69 @@ def category_id_to_name(category_id, coco_data):
     return None
 
 ## MAIN PART: export masks to bboxes
+def process_single_mask(mask_data, mask_idx, client, coco_data, image_idx):
+    """Xử lý một mask đơn lẻ và trả về annotation"""
+    mask_url = mask_data['mask']['url']
+    mask_name = mask_data['name']
+
+    # PHƯƠNG ÁN 1: Session riêng cho mỗi thread (KHUYẾN NGHỊ)
+    session_local = make_http_session()
+    
+    # PHƯƠNG ÁN 2: Sử dụng session chung (CẨN THẬN với thread safety)
+    # session_local = session  # Truyền từ bên ngoài
+    
+    category_id = check_catagories(mask_name, coco_data)
+    assert category_id is not None, f"Mask ID is None for {mask_name}"
+    assert mask_url is not None, f"Mask URL is None for {mask_name}"
+    
+    # Download mask
+    mask_image = download_image(mask_url, headers=client.headers, session=session_local)
+    assert isinstance(mask_image, Image.Image), f"Downloaded mask is not a PIL Image: {type(mask_image)}"
+    
+    # Convert to numpy array
+    mask_array = np.array(mask_image)
+    assert mask_array.ndim == 2, f"Mask array should be 2D, got {mask_array.ndim}D"
+    
+    # Find contours and bounding boxes
+    contours, *_ = cv2.findContours(mask_array, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    annotations = []
+    for contour in contours:
+        x, y, w, h = cv2.boundingRect(contour)
+        bbox = [x, y, w, h]
+        area = w * h
+        annotation = {
+            "id": mask_idx + 1,  # Unique ID for each annotation
+            "image_id": image_idx,
+            "mask_url": mask_url,  # URL of the mask image
+            "category_id": category_id,
+            "bbox": bbox,
+            "area": area,
+            "iscrowd": 0,
+        }
+        annotations.append(annotation)
+    return annotations
+
+# ======= PHƯƠNG ÁN 1: Session riêng cho mỗi thread (HIỆN TẠI) =======
+
+# Main processing loop
 session = make_http_session()
 
-for idx, item in enumerate(tqdm(data, total=len(data), desc="Converting Images", unit="img"),start=1):
-    # idx += 1
-    # get image data
+MAX_WORKERS=4
+for idx, item in enumerate(tqdm(data, total=len(data), desc="Processing ...", unit="img"), start=1):
+    # Get image data
     image_name = item['data_row']['external_id']
     image_url = item['data_row']['row_data']
     base_image = download_image(image_url, session=session)
     assert base_image is not None, f"Failed to download image from {image_url}"
     assert isinstance(base_image, Image.Image), f"Downloaded image is not a PIL Image: {type(base_image)}"
-
-    # get image size from media attributes
+    
+    # Get image size from media attributes
     W = item['media_attributes']['width']
     H = item['media_attributes']['height']
     assert W > 0 and H > 0, f"Invalid image dimensions: {W}x{H}"
-
-    # add size of image to coco data
+    
+    # Add size of image to coco data
     coco_data['images'].append({
         "id": idx,
         "width": W,
@@ -159,42 +211,36 @@ for idx, item in enumerate(tqdm(data, total=len(data), desc="Converting Images",
         "image_name": image_name,
         "image_url": image_url, 
     })
+    
     masks_data = item['projects'][PROJECT_ID]['labels'][0]['annotations']['objects']
-
-    for mask_idx, mask in enumerate(tqdm(masks_data, total=len(masks_data), desc=f"Processing masks for {image_name}", unit="mask"),start=1):
-        mask_url = mask['mask']['url']
-        mask_name = mask['name']
-        category_id = check_catagories(mask_name, coco_data)
-        assert category_id is not None, f"Mask ID is None for {mask_name} in {image_name}"
-        assert mask_url is not None, f"Mask URL is None for {mask_name} in {image_name}"
+    
+    # Xử lý masks song song với ThreadPoolExecutor
+    all_annotations = []
+    with cf.ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+        # Submit tất cả mask tasks
+        future_to_mask = {}
+        for mask_idx, mask in enumerate(masks_data, start=1):
+            future = executor.submit(process_single_mask, mask, mask_idx, client, coco_data, idx)
+            future_to_mask[future] = mask_idx
         
-        # download mask
-        mask_image = download_image(mask_url, headers=client.headers, session=session)
-        assert isinstance(mask_image, Image.Image), f"Downloaded mask is not a PIL Image: {type(mask_image)}"
-        
-        # convert to numpy array
-        mask_array = np.array(mask_image)
-        assert mask_array.ndim == 2, f"Mask array should be 2D, got {mask_array.ndim}D"
-        
-        # find contours and bounding boxes
-        contours, _ = cv2.findContours(mask_array, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-         
-        for idx_contour, contour in enumerate(contours):
-            x, y, w, h = cv2.boundingRect(contour)
-            bbox = [x, y, x + w, y + h]
-            area = w * h
-            annotation = {
-                "id": mask_idx + 1,  # Unique ID for each annotation
-                "image_id": idx,
-                "mask_url": mask_url,  # URL of the mask image
-                "category_id": category_id,  # Assuming single category for now
-                "bbox": bbox,
-                "area": area,
-                "iscrowd": 0,
-            }
-            coco_data['annotations'].append(annotation)
+        # Collect results từ tất cả futures với progress bar
+        for future in tqdm(cf.as_completed(future_to_mask), 
+                          total=len(future_to_mask),
+                          desc=f"Processing masks in {image_name}", 
+                          unit="mask"):
+            try:
+                annotations = future.result()
+                all_annotations.extend(annotations)
+            except Exception as e:
+                mask_idx = future_to_mask[future]
+                print(f"Error processing mask {mask_idx} in {image_name}: {e}")
+    
+    # Thêm tất cả annotations vào coco_data
+    coco_data['annotations'].extend(all_annotations)
+    
     # Save the coco_data to a JSON file
-    file_name = image_name.split('.')[0]
+    file_name = image_name.split('.')[0] + f"_{idx}"
     annotation_file = os.path.join(ANNOTATION_DIR, f"{file_name}.json")
     with open(annotation_file, 'w') as f:
         json.dump(coco_data, f, indent=4)
+print("Complete processing data into coco format")
