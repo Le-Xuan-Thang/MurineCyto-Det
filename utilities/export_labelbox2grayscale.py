@@ -14,9 +14,12 @@ def make_http_session():
     """HTTP session with retry"""
     sess = requests.Session()
     retries = Retry(
-        total=5, connect=3, read=3, backoff_factor=0.3,
+        total=5,
+        connect=3,
+        read=3,
+        backoff_factor=0.3,
         status_forcelist=(429, 500, 502, 503, 504),
-        allowed_methods=("GET", "HEAD")
+        allowed_methods=("GET", "HEAD"),
     )
     sess.mount("http://", HTTPAdapter(max_retries=retries))
     sess.mount("https://", HTTPAdapter(max_retries=retries))
@@ -48,13 +51,7 @@ def _mask_to_bool(mask_img, target_size):
 
 
 def export_labelbox_data(
-    api_key,
-    project_id,
-    output_dir,
-    export_params,
-    filters,
-    label2id,
-    max_workers=6
+    api_key, project_id, output_dir, export_params, filters, label2id, max_workers=6
 ):
     """Export Labelbox masks -> grayscale segmentation"""
     client = lb.Client(api_key=api_key)
@@ -70,13 +67,15 @@ def export_labelbox_data(
 
     # I/O dirs
     IMAGE_DIR = os.path.join(output_dir, "images")
-    MASK_DIR  = os.path.join(output_dir, "masks_grayscale")
+    MASK_DIR = os.path.join(output_dir, "masks_grayscale")
     os.makedirs(IMAGE_DIR, exist_ok=True)
-    os.makedirs(MASK_DIR,  exist_ok=True)
+    os.makedirs(MASK_DIR, exist_ok=True)
 
     session = make_http_session()
 
-    for idx, item in enumerate(tqdm(data, total=len(data), desc="Images", unit="img"), start=1):
+    for idx, item in enumerate(
+        tqdm(data, total=len(data), desc="Images", unit="img"), start=1
+    ):
         # ảnh gốc
         image_url = item["data_row"]["row_data"]
         base_image = download_image(image_url, session=session)
@@ -98,7 +97,13 @@ def export_labelbox_data(
 
         with cf.ThreadPoolExecutor(max_workers=max_workers) as ex:
             futures = [ex.submit(fetch_one, m) for m in objects]
-            for fut in tqdm(cf.as_completed(futures), total=len(futures), leave=False, desc="  Masks", unit="mask"):
+            for fut in tqdm(
+                cf.as_completed(futures),
+                total=len(futures),
+                leave=False,
+                desc="  Masks",
+                unit="mask",
+            ):
                 try:
                     obj, mask_img = fut.result()
                 except Exception as e:
@@ -108,14 +113,16 @@ def export_labelbox_data(
                     continue
 
                 label = obj.get("name")
-                class_id = label2id.get(label, 0)  # nếu label không có trong dict -> background
+                class_id = label2id.get(
+                    label, 0
+                )  # nếu label không có trong dict -> background
 
                 mask_bool = _mask_to_bool(mask_img, (W, H))
                 mask_combined[mask_bool] = class_id  # gán class_id vào vùng mask
 
         # save
         ext_id = item["data_row"]["external_id"]
-        fname = ext_id.split('.')[0] + f"_{idx}." + ext_id.split('.')[-1]
+        fname = ext_id.split(".")[0] + f"_{idx}." + ext_id.split(".")[-1]
         base_path = os.path.join(IMAGE_DIR, fname)
         mask_path = os.path.join(MASK_DIR, fname)
 
@@ -124,15 +131,17 @@ def export_labelbox_data(
 
 
 if __name__ == "__main__":
-    root_dir = "/Users/lexuanthang/OneDrive/WORKING/Projects/CellDetection/Code/Murincells/"
+    root_dir = (
+        "/Users/lexuanthang/OneDrive/WORKING/Projects/CellDetection/Code/Murincells/"
+    )
     data_dir = os.path.join(root_dir, "data")
-    labelbox_dir = os.path.join(root_dir, "labelbox") 
+    labelbox_dir = os.path.join(root_dir, "labelbox")
     token_path = os.path.join(labelbox_dir, "token.json")
 
-    with open(token_path,'r') as f:
+    with open(token_path, "r") as f:
         token_data = json.load(f)
-        API_KEY = token_data['api_key']
-        PROJECT_ID = token_data['project_id']
+        API_KEY = token_data["api_key"]
+        PROJECT_ID = token_data["project_id"]
 
     export_params = {
         "attachments": True,
@@ -154,14 +163,14 @@ if __name__ == "__main__":
         "Eosinophil": 3,
         "Lymphocyte": 4,
         "Unknown cell/Debris": 5,
-        "Basophil": 6
     }
 
     export_labelbox_data(
-        API_KEY, PROJECT_ID,
-        output_dir=data_dir, 
-        export_params=export_params, 
+        API_KEY,
+        PROJECT_ID,
+        output_dir=data_dir,
+        export_params=export_params,
         filters=filters,
         label2id=label2id,
-        max_workers=4
+        max_workers=4,
     )
