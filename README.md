@@ -1,33 +1,64 @@
 # MurineCyto Detection and Segmentation
 
-This project contains the code used for murine BALF cytology segmentation and
-object-detection experiments published in **Paper-2025-MurineCyto-Det**.
+Code used for murine BALF cytology segmentation and object-detection experiments
+published in **Paper-2025-MurineCyto-Det**.
 
-## Layout
+## Project Layout
 
 ```
 .
-├── dataloader/               # PyTorch dataset & dataloader builders (segmentation)
+├── dataloader/
+│   └── dataloaders.py            # Dataset class & augmentation pipelines
+│
 ├── utils/
-│   ├── data.py               # HuggingFace download, extraction, train/val/test split
-│   ├── det_helpers.py        # Object-detection visualisation & annotation checks
-│   ├── preprocessing/        # Labelbox export → grayscale mask converters
-│   └── postprocessing/       # Plotting, prediction, confusion-matrix helpers
-├── download_data.py          # CLI dataset downloader
-├── seg_v1_torch.py           # Plain-PyTorch segmentation trainer (UNet / SegFormer)
-├── seg_v1.py                 # PyTorch-Lightning segmentation trainer
-├── seg.py                    # Compatibility wrapper → seg_v1_torch
-├── od.py                     # Faster R-CNN object-detection trainer
-├── main.py                   # Health-check entry point
-├── reports.py                # Manuscript figure & metric generation
-└── notebooks/                # Exploratory / analysis notebooks
-    └── notebooks/
-        ├── YOLOv8.ipynb      # YOLO training & evaluation (Colab)
-        └── FasterRCNN.ipynb  # Faster R-CNN exploration notebook
+│   ├── data.py                   # HuggingFace download, extraction, train/val/test split
+│   ├── det_helpers.py            # OD visualisation & annotation consistency checks
+│   ├── helpers.py                # Re-exports from postprocessing helpers
+│   ├── plot_segmentation.py      # Segmentation-specific plot utilities
+│   ├── preprocessing/
+│   │   ├── export_labelbox.py    # Export annotations from Labelbox
+│   │   ├── export_labelbox2grayscale.py  # Convert colour masks → grayscale
+│   │   └── masks2bboxes.py       # Derive bounding boxes from segmentation masks
+│   └── postprocessing/
+│       ├── helpers.py            # predict_and_plot, confusion matrix, metric bars
+│       └── tools.py              # Dataloader validation utilities
+│
+├── train_seg_torch.py            # Segmentation trainer — plain PyTorch (UNet + SegFormer)
+├── train_seg_lightning.py        # Segmentation trainer — PyTorch Lightning (UNet + SegFormer)
+├── train_od.py                   # Object-detection trainer — Faster R-CNN (torchvision)
+│
+├── download_data.py              # CLI dataset downloader (HuggingFace Hub)
+├── main.py                       # Project health-check
+├── reports.py                    # Manuscript figure & metric generation
+│
+└── notebooks/
+    ├── yolo.ipynb                # YOLO v8 training & evaluation (Google Colab)
+    ├── faster_rcnn.ipynb         # Faster R-CNN exploration
+    ├── segmentation_multiclass.ipynb  # Segmentation model analysis
+    ├── report.ipynb              # Full report notebook
+    ├── paper_benchmark_seg.ipynb # Paper benchmark: segmentation models
+    ├── unet_exploration.ipynb    # UNet early exploration
+    ├── pspnet_exploration.ipynb  # PSPNet exploration
+    ├── seg_models_exploration.ipynb   # General seg-models exploration
+    ├── data_export_labelbox.ipynb     # Export annotations from Labelbox
+    ├── data_masks_to_bboxes.ipynb     # Mask → bounding-box conversion
+    ├── data_extract_ndpi_to_png.ipynb # NDPI slide → PNG tiles
+    └── data_openslide_demo.ipynb      # OpenSlide Python demo
 ```
 
 Generated or large local artifacts live in `data/`, `logs/`, `models/`,
-`figures/`, and `paper/` — these are git-ignored.
+`figures/`, and `paper/` — all git-ignored.
+
+## Cell Classes
+
+| Index | Class |
+|-------|-------|
+| 0 | Background |
+| 1 | Macrophage/Monocyte |
+| 2 | Neutrophil |
+| 3 | Eosinophil |
+| 4 | Lymphocyte |
+| 5 | Unknown cell/Debris |
 
 ## Environment
 
@@ -37,7 +68,7 @@ Use `uv` for Python dependency management:
 uv sync
 ```
 
-If the default uv cache is not writable in a sandboxed environment:
+If the default uv cache is not writable (sandboxed environment):
 
 ```bash
 uv --cache-dir /tmp/uv-cache sync
@@ -46,8 +77,6 @@ uv --cache-dir /tmp/uv-cache sync
 ## Common Commands
 
 ### Health check
-
-Verify local data is present and can be split:
 
 ```bash
 uv run murine-check
@@ -59,42 +88,47 @@ uv run murine-check
 uv run murine-download
 ```
 
-Set `HF_TOKEN` in your environment or `.env` file for private dataset access.
+Set `HF_TOKEN` in your environment or `.env` for private dataset access.
+Do **not** hard-code tokens in source files.
 
-### Segmentation (UNet & SegFormer)
+---
 
-Train both models with plain PyTorch:
+### Segmentation — UNet & SegFormer
+
+Train with plain PyTorch *(recommended)*:
 
 ```bash
-uv run murine-train-torch
+uv run murine-train-seg
 ```
 
 Train with PyTorch Lightning:
 
 ```bash
-uv run murine-train-lightning
+uv run murine-train-seg-lightning
 ```
 
-On a **4 GB GPU** (e.g. GTX 1650), use a smaller batch size:
+On a **4 GB GPU** (e.g. GTX 1650):
 
 ```bash
-uv run murine-train-torch --epochs 2 --batch-size 1
+uv run murine-train-seg --epochs 2 --batch-size 1
 ```
 
-Available CLI options for `murine-train-torch`:
+**CLI options for `murine-train-seg`:**
 
 | Option | Default | Description |
 |--------|---------|-------------|
 | `--epochs N` | 10 | Training epochs |
 | `--batch-size N` | 8 | Batch size |
 | `--num-workers N` | 0 | DataLoader workers |
-| `--models unet segformer` | both | Models to train |
+| `--models unet segformer` | both | Which models to train |
 | `--run-name NAME` | timestamp | Label for logs & checkpoints |
 
-Use `ENCODER_WEIGHTS=imagenet uv run murine-train-torch` to load pre-trained
-backbone weights (requires internet access).
+Use `ENCODER_WEIGHTS=imagenet uv run murine-train-seg` to load pre-trained
+backbone weights (requires internet access on first run).
 
-### Object Detection (Faster R-CNN)
+---
+
+### Object Detection — Faster R-CNN
 
 ```bash
 uv run murine-train-od
@@ -106,7 +140,7 @@ On a **4 GB GPU**:
 uv run murine-train-od --epochs 2 --batch-size 1
 ```
 
-Available CLI options for `murine-train-od`:
+**CLI options for `murine-train-od`:**
 
 | Option | Default | Description |
 |--------|---------|-------------|
@@ -121,21 +155,4 @@ Metrics (mAP, mAP@50, mAP@75) are logged to
 `logs/faster_rcnn_torch/<run-name>/metrics.csv`.
 
 **YOLO:** Training was performed on Google Colab with the `ultralytics` library.
-See `notebooks/notebooks/YOLOv8.ipynb` for the full pipeline.
-
-## Cell Classes
-
-| Index | Class |
-|-------|-------|
-| 0 | Background |
-| 1 | Macrophage/Monocyte |
-| 2 | Neutrophil |
-| 3 | Eosinophil |
-| 4 | Lymphocyte |
-| 5 | Unknown cell/Debris |
-
-## Dataset access
-
-The dataset is hosted on Hugging Face (`thanglexuan/murincells`).  Set the
-`HF_TOKEN` environment variable (or add it to `.env`) if the dataset is
-private.  Do **not** hard-code tokens in source files.
+See `notebooks/yolo.ipynb` for the full pipeline.

@@ -3,7 +3,7 @@ import os
 import glob
 import pandas as pd
 import matplotlib
-matplotlib.use("Agg")    
+matplotlib.use("Agg")   # non-interactive backend for saving figures to disk
 import matplotlib.pyplot as plt
 import seaborn as sns
 import segmentation_models_pytorch as smp
@@ -29,7 +29,7 @@ plt.rcParams["lines.markeredgecolor"] = "black"
 # %% all directories
 root_dir = os.getcwd()
 logs_dir = os.path.join(root_dir, "logs")
-unet_model_dir = os.path.join(logs_dir, "unet")
+# Lightning logs use version_N subdirectories; torch logs use run-name subdirectories
 data_dir = os.path.join(root_dir, "data")
 
 
@@ -48,7 +48,6 @@ ann_path = os.path.join(annotations_dir, image_ls[idx]).replace("png","json")
 # Read images
 image = plt.imread(image_path)
 mask = plt.imread(mask_path)
-matplotlib.use("QtAgg")
 
 # Plot images side by side
 fig, ax = plt.subplots(1, 2, figsize=(8, 6))
@@ -101,24 +100,41 @@ plt.savefig("data_example.pdf", dpi=300, bbox_inches="tight")
 
 
 # %% get metrics result and model
-def get_csv_file_path(path=str):
-    if path.endswith(".csv") and os.path.isfile(path):
-        csv_file_path = path
-    else:
-        # tìm version mới nhất trong folder
-        version_dirs = glob.glob(os.path.join(path, "version_*"))
-        if not version_dirs:
-            raise FileNotFoundError(f"No version_x folders found in {path}")
-        latest_version = max(version_dirs, key=os.path.getmtime)
-        csv_file_path = os.path.join(latest_version, "metrics.csv")
-    return csv_file_path
+def get_csv_file_path(model_log_dir: str) -> str:
+    """Return path to metrics.csv for a given model log directory.
 
-latest_version_unet = "version_12"
-metrics_csv_unet = os.path.join(unet_model_dir, latest_version_unet, "metrics.csv")
-print(metrics_csv_unet)
-unet_csv_file_path = get_csv_file_path(metrics_csv_unet)
-seg_model_dir = os.path.join(logs_dir, "segformer") 
-segformer_csv_file_path = get_csv_file_path(seg_model_dir)
+    Supports two log layouts:
+    - PyTorch trainer  : logs/<model>_torch/<run-name>/metrics.csv
+    - Lightning trainer: logs/<model>/version_N/metrics.csv
+    """
+    if model_log_dir.endswith(".csv") and os.path.isfile(model_log_dir):
+        return model_log_dir
+
+    # Try plain PyTorch layout: pick the most-recently modified run subdirectory
+    run_dirs = [
+        d for d in glob.glob(os.path.join(model_log_dir, "*"))
+        if os.path.isdir(d) and os.path.isfile(os.path.join(d, "metrics.csv"))
+    ]
+    if run_dirs:
+        latest = max(run_dirs, key=os.path.getmtime)
+        return os.path.join(latest, "metrics.csv")
+
+    # Fallback: Lightning layout (version_N)
+    version_dirs = glob.glob(os.path.join(model_log_dir, "version_*"))
+    if version_dirs:
+        latest_version = max(version_dirs, key=os.path.getmtime)
+        return os.path.join(latest_version, "metrics.csv")
+
+    raise FileNotFoundError(f"No metrics.csv found under: {model_log_dir}")
+
+
+unet_model_dir     = os.path.join(logs_dir, "unet_torch")
+segformer_model_dir = os.path.join(logs_dir, "segformer_torch")
+
+unet_csv_file_path      = get_csv_file_path(unet_model_dir)
+segformer_csv_file_path = get_csv_file_path(segformer_model_dir)
+print(f"UNet metrics    : {unet_csv_file_path}")
+print(f"SegFormer metrics: {segformer_csv_file_path}")
 
 # Load data of unet model
 df_unet = pd.read_csv(unet_csv_file_path)
@@ -227,52 +243,30 @@ results = plot_final_metrics_bar(dfs_val, metrics, save_dir=save_dir, prefix="se
 print(results)
 
 # %% Load dataset
-import zipfile
-from sklearn.model_selection import train_test_split
-from huggingface_hub import hf_hub_download
 from torch.utils.data import DataLoader
-from seg_v1 import MurineCellModel
-from seg_v1 import Dataset
-from seg_v1 import get_validation_augmentation
-import os
+from train_seg_lightning import MurineCellModel
+from dataloader.dataloaders import Dataset, get_validation_augmentation
+from utils.data import prepare_data, make_splits
 from dotenv import load_dotenv
 
 load_dotenv()
-token = os.getenv('HF_TOKEN')
+token = os.getenv("HF_TOKEN")
 root_dir = os.getcwd()
 model_dir = os.path.join(root_dir, "models")
 os.makedirs(model_dir, exist_ok=True)
-data_zip_path = hf_hub_download(
-    repo_id = "thanglexuan/murincells",
-    filename = "data.zip",
-    repo_type = "dataset",
-    token = token
-)
-data_dir = os.path.join(root_dir, "data")
-os.makedirs(data_dir, exist_ok=True)
-with zipfile.ZipFile(data_zip_path, "r") as zip_ref:
-    zip_ref.extractall(data_dir)
-    
-images_dir = os.path.join(data_dir, "images")
-masks_dir = os.path.join(data_dir, "masks")
-image_ls = sorted(os.listdir(images_dir))
-mask_ls = sorted(os.listdir(masks_dir))
 
-x_train_dir, x_temp_dir, y_train_dir, y_temp_dir = train_test_split(
-    image_ls, mask_ls, test_size=0.3, random_state=42
-)
-x_val_dir, x_test_dir, y_val_dir, y_test_dir = train_test_split(
-    x_temp_dir, y_temp_dir, test_size=0.5, random_state=42
-)
-print("train size:{}".format(len(x_train_dir)))
-print("val size:{}".format(len(x_val_dir)))
-print("test size:{}".format(len(x_test_dir)))
+# Download/extract data if not already present
+data_dir = prepare_data(data_dir=os.path.join(root_dir, "data"), token=token)
+splits = make_splits(data_dir)
+print("train size:{}".format(len(splits["x_train"])))
+print("val size:{}".format(len(splits["x_val"])))
+print("test size:{}".format(len(splits["x_test"])))
 
 # %% Split dataset
 test_dataset = Dataset(
     data_dir=data_dir,
-    images_dir=x_test_dir,
-    masks_dir=y_test_dir,
+    images_dir=splits["x_test"],
+    masks_dir=splits["y_test"],
     augmentation=get_validation_augmentation(),
 )
 

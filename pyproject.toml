@@ -25,11 +25,11 @@ dependencies = [
 ]
 
 [project.scripts]
-murine-check = "main:main"
-murine-download = "download_data:main"
-murine-train-lightning = "seg_v1:main"
-murine-train-torch = "seg_v1_torch:main"
-murine-train-od = "od:main"
+murine-check           = "main:main"
+murine-download        = "download_data:main"
+murine-train-seg       = "train_seg_torch:main"
+murine-train-seg-lightning = "train_seg_lightning:main"
+murine-train-od        = "train_od:main"
 
 [build-system]
 requires = ["hatchling"]
@@ -40,11 +40,10 @@ only-include = [
   "dataloader",
   "download_data.py",
   "main.py",
-  "od.py",
+  "train_od.py",
+  "train_seg_lightning.py",
+  "train_seg_torch.py",
   "reports.py",
-  "seg.py",
-  "seg_v1.py",
-  "seg_v1_torch.py",
   "utils",
 ]
 
