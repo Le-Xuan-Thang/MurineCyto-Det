@@ -1,7 +1,34 @@
-data/
+# Python-generated files
 __pycache__/
-token.json
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
 .DS_Store
-logs/
-labelbox/
-lightning_logs/
+.pytest_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv
+.env
+
+# Large/generated project artifacts
+data/
+paper/
+logs
+models/
+figures/
+temp/
+
+# Local project instructions/secrets
+AGENTS.md
+labelbox/huggingface.json
+
+# Node.js / Claude Code artifacts
+node_modules/
+package-lock.json
+package.json
+
+# Misc scratch files
+019e553d-f57c-79a3-8b51-3d091aa07f82

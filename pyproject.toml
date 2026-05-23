@@ -1,0 +1,64 @@
+[project]
+name = "paper-2025-murinecyto-det"
+version = "0.1.0"
+description = "Murine BALF cytology segmentation and detection workflows."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "albumentations>=2.0.8",
+    "huggingface-hub>=1.12.0",
+    "matplotlib>=3.10.9",
+    "opencv-python>=4.13.0.92",
+    "pandas>=3.0.2",
+    "pycocotools>=2.0.8",
+    "pytorch-lightning>=2.6.0",
+    "python-dotenv>=1.2.2",
+    "scikit-learn>=1.8.0",
+    "seaborn>=0.13.2",
+    "segmentation-models-pytorch>=0.5.0",
+    "tensorboard>=2.20.0",
+    "torch>=2.10.0",
+    "torchmetrics>=1.9.0",
+    "torchvision>=0.25.0",
+    "tqdm>=4.67.3",
+    "labelbox>=7.7.0",
+]
+
+[project.scripts]
+murine-check = "main:main"
+murine-download = "download_data:main"
+murine-train-lightning = "seg_v1:main"
+murine-train-torch = "seg_v1_torch:main"
+murine-train-od = "od:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+only-include = [
+  "dataloader",
+  "download_data.py",
+  "main.py",
+  "od.py",
+  "reports.py",
+  "seg.py",
+  "seg_v1.py",
+  "seg_v1_torch.py",
+  "utils",
+]
+
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+explicit = true
+
+
+[tool.uv.sources]
+torch = [
+  { index = "pytorch-cu126", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+]
+torchvision = [
+  { index = "pytorch-cu126", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+  ]

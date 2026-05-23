@@ -5,7 +5,7 @@ from PIL import Image
 import cv2
 from datetime import datetime
 from tqdm.auto import tqdm
-from export_labelbox import make_http_session, download_image
+from utils.preprocessing.export_labelbox import make_http_session, download_image
 
 # Define coco format
 coco_data = {}
@@ -40,7 +40,7 @@ coco_data = {
 
 # Step 2: data from Labelbox
 # get all file names in data/images directory
-root_dir = "/Users/lexuanthang/OneDrive/WORKING/Projects/CellDetection/Code/Murincells"
+root_dir = os.getcwd()
 data_dir = os.path.join(root_dir, "data")
 labelbox_dir = os.path.join(root_dir, "labelbox")
 token_path = os.path.join(labelbox_dir, "token.json")
