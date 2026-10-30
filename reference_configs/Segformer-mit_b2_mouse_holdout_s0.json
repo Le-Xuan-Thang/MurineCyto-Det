@@ -1,0 +1,23 @@
+{
+  "arch": "Segformer",
+  "encoder": "mit_b2",
+  "scheme": "mouse_holdout",
+  "seed": 0,
+  "gpu": "0",
+  "epochs": 100,
+  "batch_size": 8,
+  "lr": 0.0002,
+  "patience": 20,
+  "data_dir": "data_v2",
+  "out_dir": "runs_revision/seg",
+  "best_epoch": 94,
+  "best_val_fg_miou": 0.6246299056256254,
+  "train_minutes": 29.735040748119353,
+  "torch": "2.11.0+cu126",
+  "smp": "0.5.0",
+  "loss": "Dice (multiclass, incl. background)",
+  "optimizer": "Adam",
+  "scheduler": "cosine per-iteration to 1e-6",
+  "train_input": "random 256x256 crops",
+  "test_input": "full 1024x1024 tile"
+}

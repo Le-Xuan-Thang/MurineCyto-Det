@@ -1,0 +1,23 @@
+{
+  "model": "yolov8",
+  "scheme": "random_tile",
+  "seed": 0,
+  "gpu": "1",
+  "epochs": 150,
+  "batch_size": 8,
+  "lr": 0.001,
+  "eval_every": 5,
+  "patience": 50,
+  "yolo_weights": "yolov8s.pt",
+  "data_dir": "data_v2",
+  "out_dir": "runs_revision/det",
+  "ultralytics": "8.4.42",
+  "weights": "yolov8s.pt",
+  "imgsz": 1024,
+  "optimizer": "AdamW",
+  "nms_iou": 0.7,
+  "augmentation": "Ultralytics defaults (mosaic, HSV, flip, scale, translate)",
+  "train_minutes": 10.013556373119354,
+  "torch": "2.11.0+cu126",
+  "torchvision": "0.26.0+cu126"
+}

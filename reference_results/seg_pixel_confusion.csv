@@ -1,0 +1,49 @@
+run,gt,Background,Macrophage/Monocyte,Neutrophil,Eosinophil,Lymphocyte,Unknown cell/Debris
+Segformer-mit_b2_mouse_holdout_s0,Background,38808378,51060,214083,2414,292,93936
+Segformer-mit_b2_mouse_holdout_s0,Macrophage/Monocyte,60280,1754389,32655,2977,7573,89185
+Segformer-mit_b2_mouse_holdout_s0,Neutrophil,263672,40070,2825264,3381,1,55940
+Segformer-mit_b2_mouse_holdout_s0,Eosinophil,1659,1219,9664,34141,0,1152
+Segformer-mit_b2_mouse_holdout_s0,Lymphocyte,3951,3916,7047,0,6836,1291
+Segformer-mit_b2_mouse_holdout_s0,Unknown cell/Debris,466286,108126,199275,654,6623,979954
+Segformer-mit_b2_mouse_holdout_s1,Background,38640743,63959,287629,2941,662,174229
+Segformer-mit_b2_mouse_holdout_s1,Macrophage/Monocyte,43658,1760867,28511,2105,14517,97401
+Segformer-mit_b2_mouse_holdout_s1,Neutrophil,175750,52916,2841925,17847,680,99210
+Segformer-mit_b2_mouse_holdout_s1,Eosinophil,792,866,9454,35730,0,993
+Segformer-mit_b2_mouse_holdout_s1,Lymphocyte,3609,1346,6113,0,7157,4816
+Segformer-mit_b2_mouse_holdout_s1,Unknown cell/Debris,329381,119983,193316,1230,3416,1113592
+Segformer-mit_b2_mouse_holdout_s2,Background,38540069,62239,329041,4648,659,233507
+Segformer-mit_b2_mouse_holdout_s2,Macrophage/Monocyte,41255,1755906,31006,4457,1892,112543
+Segformer-mit_b2_mouse_holdout_s2,Neutrophil,168817,40801,2857172,14251,1873,105414
+Segformer-mit_b2_mouse_holdout_s2,Eosinophil,430,230,8735,37747,0,693
+Segformer-mit_b2_mouse_holdout_s2,Lymphocyte,3701,6125,7645,0,4635,935
+Segformer-mit_b2_mouse_holdout_s2,Unknown cell/Debris,281137,103002,208096,1800,4292,1162591
+Segformer-mit_b2_random_tile_s0,Background,43001335,155326,180693,17058,2211,330759
+Segformer-mit_b2_random_tile_s0,Macrophage/Monocyte,95086,4579665,20390,4853,1783,195990
+Segformer-mit_b2_random_tile_s0,Neutrophil,124660,49194,1693660,14590,1853,62737
+Segformer-mit_b2_random_tile_s0,Eosinophil,3585,2925,13047,150201,0,3851
+Segformer-mit_b2_random_tile_s0,Lymphocyte,1220,4051,537,0,4945,3358
+Segformer-mit_b2_random_tile_s0,Unknown cell/Debris,182895,178495,92251,3795,5153,1246648
+Unet-resnet34_mouse_holdout_s0,Background,38697119,47956,297308,3992,0,123788
+Unet-resnet34_mouse_holdout_s0,Macrophage/Monocyte,50769,1694926,25353,3529,0,172482
+Unet-resnet34_mouse_holdout_s0,Neutrophil,288314,37943,2753454,8250,0,100367
+Unet-resnet34_mouse_holdout_s0,Eosinophil,1297,1655,20210,23980,0,693
+Unet-resnet34_mouse_holdout_s0,Lymphocyte,3104,406,6783,0,0,12748
+Unet-resnet34_mouse_holdout_s0,Unknown cell/Debris,496673,89041,218232,5833,0,951139
+Unet-resnet34_mouse_holdout_s1,Background,38844806,39096,174227,1124,0,110910
+Unet-resnet34_mouse_holdout_s1,Macrophage/Monocyte,63082,1727577,28707,0,0,127693
+Unet-resnet34_mouse_holdout_s1,Neutrophil,298677,33997,2735769,10,0,119875
+Unet-resnet34_mouse_holdout_s1,Eosinophil,1380,2118,20356,22199,0,1782
+Unet-resnet34_mouse_holdout_s1,Lymphocyte,4191,5666,5496,0,0,7688
+Unet-resnet34_mouse_holdout_s1,Unknown cell/Debris,531823,94205,154311,1017,0,979562
+Unet-resnet34_mouse_holdout_s2,Background,38788278,41039,228730,3317,0,108799
+Unet-resnet34_mouse_holdout_s2,Macrophage/Monocyte,67701,1703619,28108,111,0,147520
+Unet-resnet34_mouse_holdout_s2,Neutrophil,260072,27994,2793339,11024,0,95899
+Unet-resnet34_mouse_holdout_s2,Eosinophil,1529,1969,22149,21428,0,760
+Unet-resnet34_mouse_holdout_s2,Lymphocyte,4213,4533,6461,83,0,7751
+Unet-resnet34_mouse_holdout_s2,Unknown cell/Debris,457560,86805,194172,2196,0,1020185
+Unet-resnet34_random_tile_s0,Background,43164341,126812,195026,8762,0,192441
+Unet-resnet34_random_tile_s0,Macrophage/Monocyte,97727,4631909,13816,430,0,153885
+Unet-resnet34_random_tile_s0,Neutrophil,130185,55675,1686165,18638,0,56031
+Unet-resnet34_random_tile_s0,Eosinophil,5846,935,35130,124614,0,7084
+Unet-resnet34_random_tile_s0,Lymphocyte,1215,2146,103,0,0,10647
+Unet-resnet34_random_tile_s0,Unknown cell/Debris,311706,199571,113768,4068,0,1080124

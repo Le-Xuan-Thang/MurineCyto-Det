@@ -1,0 +1,73 @@
+run,gt,None (missed / FP),Macrophage/Monocyte,Neutrophil,Eosinophil,Lymphocyte,Unknown cell/Debris
+fasterrcnn_mouse_holdout_s0,None (missed / FP),0,13,41,4,1,148
+fasterrcnn_mouse_holdout_s0,Macrophage/Monocyte,4,252,8,5,7,26
+fasterrcnn_mouse_holdout_s0,Neutrophil,20,2,848,3,0,22
+fasterrcnn_mouse_holdout_s0,Eosinophil,1,0,6,8,0,0
+fasterrcnn_mouse_holdout_s0,Lymphocyte,4,0,2,0,4,3
+fasterrcnn_mouse_holdout_s0,Unknown cell/Debris,353,2,40,0,0,500
+fasterrcnn_mouse_holdout_s1,None (missed / FP),0,54,100,11,18,447
+fasterrcnn_mouse_holdout_s1,Macrophage/Monocyte,3,256,9,1,0,33
+fasterrcnn_mouse_holdout_s1,Neutrophil,17,3,850,0,0,25
+fasterrcnn_mouse_holdout_s1,Eosinophil,1,0,5,9,0,0
+fasterrcnn_mouse_holdout_s1,Lymphocyte,2,0,2,0,0,9
+fasterrcnn_mouse_holdout_s1,Unknown cell/Debris,236,4,37,1,0,617
+fasterrcnn_mouse_holdout_s2,None (missed / FP),0,15,41,4,3,160
+fasterrcnn_mouse_holdout_s2,Macrophage/Monocyte,4,261,10,2,8,17
+fasterrcnn_mouse_holdout_s2,Neutrophil,15,2,859,1,0,18
+fasterrcnn_mouse_holdout_s2,Eosinophil,1,0,6,8,0,0
+fasterrcnn_mouse_holdout_s2,Lymphocyte,3,0,2,0,2,6
+fasterrcnn_mouse_holdout_s2,Unknown cell/Debris,377,6,39,0,3,470
+fasterrcnn_random_tile_s0,None (missed / FP),0,76,72,14,6,560
+fasterrcnn_random_tile_s0,Macrophage/Monocyte,5,794,2,0,0,42
+fasterrcnn_random_tile_s0,Neutrophil,17,8,563,1,0,34
+fasterrcnn_random_tile_s0,Eosinophil,1,0,11,42,0,5
+fasterrcnn_random_tile_s0,Lymphocyte,0,0,0,0,0,9
+fasterrcnn_random_tile_s0,Unknown cell/Debris,131,9,10,0,0,548
+maskrcnn_mouse_holdout_s0,None (missed / FP),0,8,31,0,2,117
+maskrcnn_mouse_holdout_s0,Macrophage/Monocyte,13,258,11,1,6,13
+maskrcnn_mouse_holdout_s0,Neutrophil,31,2,851,0,0,11
+maskrcnn_mouse_holdout_s0,Eosinophil,1,0,9,5,0,0
+maskrcnn_mouse_holdout_s0,Lymphocyte,4,0,3,0,3,3
+maskrcnn_mouse_holdout_s0,Unknown cell/Debris,399,10,36,0,0,450
+maskrcnn_mouse_holdout_s1,None (missed / FP),0,50,95,7,7,455
+maskrcnn_mouse_holdout_s1,Macrophage/Monocyte,3,262,6,6,0,25
+maskrcnn_mouse_holdout_s1,Neutrophil,20,6,835,1,0,33
+maskrcnn_mouse_holdout_s1,Eosinophil,1,0,6,8,0,0
+maskrcnn_mouse_holdout_s1,Lymphocyte,2,0,1,0,0,10
+maskrcnn_mouse_holdout_s1,Unknown cell/Debris,249,8,25,0,0,613
+maskrcnn_mouse_holdout_s2,None (missed / FP),0,45,63,8,9,255
+maskrcnn_mouse_holdout_s2,Macrophage/Monocyte,2,250,8,3,8,31
+maskrcnn_mouse_holdout_s2,Neutrophil,21,3,847,1,0,23
+maskrcnn_mouse_holdout_s2,Eosinophil,1,0,6,8,0,0
+maskrcnn_mouse_holdout_s2,Lymphocyte,2,0,2,0,2,7
+maskrcnn_mouse_holdout_s2,Unknown cell/Debris,298,8,28,0,2,559
+maskrcnn_random_tile_s0,None (missed / FP),0,37,36,1,2,318
+maskrcnn_random_tile_s0,Macrophage/Monocyte,5,817,2,1,0,18
+maskrcnn_random_tile_s0,Neutrophil,16,7,572,3,2,23
+maskrcnn_random_tile_s0,Eosinophil,1,0,7,49,0,2
+maskrcnn_random_tile_s0,Lymphocyte,0,0,0,0,2,7
+maskrcnn_random_tile_s0,Unknown cell/Debris,136,15,12,0,0,535
+yolov8_mouse_holdout_s0,None (missed / FP),0,51,171,8,14,258
+yolov8_mouse_holdout_s0,Macrophage/Monocyte,6,257,9,0,11,19
+yolov8_mouse_holdout_s0,Neutrophil,20,5,857,1,2,10
+yolov8_mouse_holdout_s0,Eosinophil,1,0,14,0,0,0
+yolov8_mouse_holdout_s0,Lymphocyte,3,1,3,0,4,2
+yolov8_mouse_holdout_s0,Unknown cell/Debris,314,37,73,0,3,468
+yolov8_mouse_holdout_s1,None (missed / FP),0,31,115,0,17,197
+yolov8_mouse_holdout_s1,Macrophage/Monocyte,5,249,9,0,12,27
+yolov8_mouse_holdout_s1,Neutrophil,33,3,845,2,0,12
+yolov8_mouse_holdout_s1,Eosinophil,2,0,8,4,0,1
+yolov8_mouse_holdout_s1,Lymphocyte,3,0,2,0,3,5
+yolov8_mouse_holdout_s1,Unknown cell/Debris,396,30,74,0,1,394
+yolov8_mouse_holdout_s2,None (missed / FP),0,17,48,1,5,103
+yolov8_mouse_holdout_s2,Macrophage/Monocyte,11,256,7,0,10,18
+yolov8_mouse_holdout_s2,Neutrophil,45,3,825,5,0,17
+yolov8_mouse_holdout_s2,Eosinophil,2,0,5,8,0,0
+yolov8_mouse_holdout_s2,Lymphocyte,5,0,2,0,4,2
+yolov8_mouse_holdout_s2,Unknown cell/Debris,428,33,52,5,2,375
+yolov8_random_tile_s0,None (missed / FP),0,26,28,3,0,113
+yolov8_random_tile_s0,Macrophage/Monocyte,13,811,3,0,1,15
+yolov8_random_tile_s0,Neutrophil,20,6,590,0,0,7
+yolov8_random_tile_s0,Eosinophil,1,0,8,49,0,1
+yolov8_random_tile_s0,Lymphocyte,2,0,0,0,3,4
+yolov8_random_tile_s0,Unknown cell/Debris,242,69,33,1,0,353
