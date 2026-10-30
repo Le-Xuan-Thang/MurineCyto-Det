@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from revision.data_paths import data_root
+from murinecyto_det.paths import data_root
 
 
 def main():

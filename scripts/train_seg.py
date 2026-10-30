@@ -1,10 +1,10 @@
-"""Semantic-segmentation benchmark for the CSBJ revision (U-Net / SegFormer).
+"""Semantic-segmentation benchmark for MurineCyto-Det (U-Net / SegFormer).
 
 Trains on random 256x256 crops, selects the checkpoint with the best validation
 foreground mIoU, and saves full-resolution (1024x1024) test predictions as uint8 label
-maps for revision/evaluate_seg.py.
+maps for scripts/evaluate_seg.py.
 
-Usage: python revision/train_seg.py --arch Unet --encoder resnet34 --scheme mouse_holdout --seed 0 --gpu 0
+Usage: python scripts/train_seg.py --arch Unet --encoder resnet34 --scheme mouse_holdout --seed 0 --gpu 0
 """
 
 import argparse
@@ -20,8 +20,8 @@ import torch
 from torch.utils.data import DataLoader
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from dataloader.dataloaders import Dataset, get_training_augmentation, get_validation_augmentation  # noqa: E402
-from revision.data_paths import data_root, run_root, require_semantic_data
+from murinecyto_det.datasets import Dataset, get_training_augmentation, get_validation_augmentation  # noqa: E402
+from murinecyto_det.paths import data_root, run_root, require_semantic_data
 
 NUM_CLASSES = 6  # background + 5 cell classes
 

@@ -24,7 +24,7 @@ def main():
     with zipfile.ZipFile(args.output, "w", zipfile.ZIP_DEFLATED, compresslevel=1, allowZip64=True) as z:
         for p in files:
             z.write(p, Path("runs_revision") / p.relative_to(args.source_runs))
-        z.writestr("runs_revision/ARTIFACTS_README.txt", "Completed-run artifacts for MurineCyto-Det v2.\nExtract next to revision/ and data_v2/.\nPrimary benchmark: mouse_holdout (seeds 0,1,2).\nrandom_tile runs are a secondary single-seed comparison only.\nDefault mask ground truth: data_v2/annotations/benchmark/.\nCheckpoint selection and reported AP50:95 use maxDets=100; AP50/AP75 use 300.\nNo credentials, raw Labelbox exports, caches or training images are included.\n")
+        z.writestr("runs_revision/ARTIFACTS_README.txt", "Completed-run artifacts for MurineCyto-Det v2.\nExtract next to scripts/ and data_v2/.\nPrimary benchmark: mouse_holdout (seeds 0,1,2).\nrandom_tile runs are a secondary single-seed comparison only.\nDefault mask ground truth: data_v2/annotations/benchmark/.\nCheckpoint selection and reported AP50:95 use maxDets=100; AP50/AP75 use 300.\nNo credentials, raw Labelbox exports, caches or training images are included.\n")
     print(json.dumps({"archive": str(args.output), "files": len(files), "bytes": args.output.stat().st_size}))
 
 

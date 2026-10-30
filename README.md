@@ -1,6 +1,19 @@
 # MurineCyto-Det — revised benchmark
 
-This directory contains the pipeline for the completed revised experiments. The primary benchmark is the fixed **mouse-level 242/47/44 split**. Historical scripts in the upstream repository are not the entry points for these results. The old `train_od.py` path now delegates to the revised detector trainer, and `utils/preprocessing/masks2bboxes.py` exports per-image files from v2 full-instance COCO annotations rather than fragment contours.
+This repository contains the pipeline for the completed revised experiments. The primary benchmark is the fixed **mouse-level 242/47/44 split**. Per-image annotation files are exported from the v2 full-instance COCO annotations with `scripts/export_per_image.py`.
+
+## Repository layout
+
+```
+murinecyto_det/      shared library code (data paths, segmentation dataset/augmentations)
+scripts/             entry points: training, evaluation, figures
+  release/           maintainer tools to build, validate and package the data release
+configs/             configuration records of the completed benchmark runs
+results/             reference result CSVs reported in the paper
+docs/                data documentation and reproducibility notes
+```
+
+Data (`data_v2/`) and run artifacts (`runs_revision/`) are downloaded separately and are not tracked by Git.
 
 ## Environment
 
@@ -17,7 +30,7 @@ The supplied `uv.lock` is the revision lockfile (PyTorch 2.11.0 / torchvision 0.
 Download **data_v2.zip** from the v2 Zenodo version linked by the manuscript, and extract it into the repository root. The archive contains one top-level `data_v2/` directory. No Hugging Face token or Labelbox account is required to use the public release.
 
 ```sh
-uv run python revision/validate_release.py --data-dir data_v2 --check-hashes --check-masks
+uv run python scripts/release/validate_release.py --data-dir data_v2 --check-hashes --check-masks
 ```
 
 See [the data documentation](docs/DATA_README.md) for folder names, category IDs and the two instance-mask sets. All scripts resolve relative data/run paths from the repository root, so they also work when called by an absolute script path from another directory.
@@ -27,11 +40,11 @@ See [the data documentation](docs/DATA_README.md) for folder names, category IDs
 Run the following once for each seed **0, 1, 2**. These are full training commands, not smoke tests. `--gpu 0` is the CUDA device index; adjust it for your workstation.
 
 ```sh
-uv run python revision/train_seg.py --arch Unet --encoder resnet34 --scheme mouse_holdout --seed 0 --gpu 0
-uv run python revision/train_seg.py --arch Segformer --encoder mit_b2 --scheme mouse_holdout --seed 0 --gpu 0
-uv run python revision/train_det.py --model fasterrcnn --scheme mouse_holdout --seed 0 --gpu 0 --batch-size 4
-uv run python revision/train_det.py --model maskrcnn --scheme mouse_holdout --seed 0 --gpu 0 --batch-size 4
-uv run python revision/train_det.py --model yolov8 --scheme mouse_holdout --seed 0 --gpu 0 --batch-size 8
+uv run python scripts/train_seg.py --arch Unet --encoder resnet34 --scheme mouse_holdout --seed 0 --gpu 0
+uv run python scripts/train_seg.py --arch Segformer --encoder mit_b2 --scheme mouse_holdout --seed 0 --gpu 0
+uv run python scripts/train_det.py --model fasterrcnn --scheme mouse_holdout --seed 0 --gpu 0 --batch-size 4
+uv run python scripts/train_det.py --model maskrcnn --scheme mouse_holdout --seed 0 --gpu 0 --batch-size 4
+uv run python scripts/train_det.py --model yolov8 --scheme mouse_holdout --seed 0 --gpu 0 --batch-size 8
 ```
 
 Changing batch size or other hyperparameters creates a different training configuration. The scripts use the supplied split lists; they never randomly repartition the primary benchmark. Best validation checkpoints are reloaded before inference. The default `--annotation-set benchmark` reproduces the reconstructed instance masks used in the paper. An optional `--annotation-set original` is a separate experiment, and must use a separate output directory.
@@ -41,16 +54,16 @@ Changing batch size or other hyperparameters creates a different training config
 Extract the optional **benchmark_artifacts.zip** into this root to obtain `runs_revision/`, including configuration files, best checkpoints and saved predictions. Then run:
 
 ```sh
-uv run python revision/evaluate_seg.py --data-dir data_v2 --runs-dir runs_revision --scheme mouse_holdout
-uv run python revision/evaluate_det.py --data-dir data_v2 --runs-dir runs_revision --scheme mouse_holdout
+uv run python scripts/evaluate_seg.py --data-dir data_v2 --runs-dir runs_revision --scheme mouse_holdout
+uv run python scripts/evaluate_det.py --data-dir data_v2 --runs-dir runs_revision --scheme mouse_holdout
 ```
 
-Outputs are written to `runs_revision/results/`. The `reference_results/` CSVs preserve the results before repackaging. The detection evaluator retains the implemented convention: AP50:95 at maxDets=100; AP50/AP75 at maxDets=300; prediction cap 300/image. All models use the same convention. It explicitly extracts these limits instead of depending silently on the COCO summary default. Mask metrics use the reconstructed benchmark masks by default. Main-table point estimates average three seeds, while the reported bootstrap intervals are for seed 0.
+Outputs are written to `runs_revision/results/`. The `results/` CSVs preserve the results before repackaging. The detection evaluator retains the implemented convention: AP50:95 at maxDets=100; AP50/AP75 at maxDets=300; prediction cap 300/image. All models use the same convention. It explicitly extracts these limits instead of depending silently on the COCO summary default. Mask metrics use the reconstructed benchmark masks by default. Main-table point estimates average three seeds, while the reported bootstrap intervals are for seed 0.
 
 For a separately labeled sensitivity analysis using original Labelbox masks:
 
 ```sh
-uv run python revision/evaluate_det.py --data-dir data_v2 --runs-dir runs_revision --scheme mouse_holdout --annotation-set original --results-dir runs_revision/results_original_masks
+uv run python scripts/evaluate_det.py --data-dir data_v2 --runs-dir runs_revision --scheme mouse_holdout --annotation-set original --results-dir runs_revision/results_original_masks
 ```
 
 This does not modify the saved predictions or the reported reference CSVs. The historical `random_tile` comparison remains available with explicit `--scheme random_tile`; it is not the primary benchmark. Figure-generation commands are documented in [REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md).
@@ -58,7 +71,7 @@ This does not modify the saved predictions or the reported reference CSVs. The h
 ## Rebuild the data release (maintainers only)
 
 ```sh
-uv run python revision/prepare_release.py --source-code-dir /path/to/local/revision/code --output /path/to/new/data_v2 --zip /path/to/data_v2.zip
+uv run python scripts/release/prepare_release.py --source-code-dir /path/to/local/revision/code --output /path/to/new/data_v2 --zip /path/to/data_v2.zip
 ```
 
 The source must contain the existing `data/` and `data_v2/annotations/instances_labelbox.json`. Output must be a new directory. The script copies existing scientific data without changing masks, split membership or class labels, and strips private Labelbox identifiers/URLs.

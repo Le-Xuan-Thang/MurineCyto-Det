@@ -1,6 +1,6 @@
 # Reproducibility notes
 
-The completed benchmark used three seeds (0, 1, 2) for each of five models on the primary mouse-level 242/47/44 split. Configurations in `reference_configs/` are copies of completed-run records; they are not regenerated training logs. Their paths are descriptive of the run directory layout. Checkpoints and predictions are distributed separately.
+The completed benchmark used three seeds (0, 1, 2) for each of five models on the primary mouse-level 242/47/44 split. Configurations in `configs/` are copies of completed-run records; they are not regenerated training logs. Their paths are descriptive of the run directory layout. Checkpoints and predictions are distributed separately.
 
 ## Protocol preserved during repackaging
 
@@ -16,10 +16,10 @@ The completed benchmark used three seeds (0, 1, 2) for each of five models on th
 The original figure builders consume both primary and secondary CSVs. To reproduce all figures, evaluate with `--scheme all` after extracting artifacts (including the historical single-seed secondary runs), then run:
 
 ```sh
-uv run python revision/evaluate_seg.py --scheme all
-uv run python revision/evaluate_det.py --scheme all
-uv run python revision/make_figures.py
-uv run python revision/make_qualitative.py
+uv run python scripts/evaluate_seg.py --scheme all
+uv run python scripts/evaluate_det.py --scheme all
+uv run python scripts/make_figures.py
+uv run python scripts/make_qualitative.py
 ```
 
 Their relative paths are resolved from the repository root. These commands write derived files under `runs_revision/`; they do not modify images, annotations or checkpoints. See each script's `--help` where supported. The benchmark artifacts archive includes only required model/prediction files; raw private data and training caches are excluded.

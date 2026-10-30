@@ -1,4 +1,4 @@
-"""Detection / instance-segmentation benchmark for the CSBJ revision.
+"""Detection / instance-segmentation benchmark for MurineCyto-Det.
 
 Models
   fasterrcnn : torchvision Faster R-CNN ResNet50-FPN (COCO init), native 1024x1024 input,
@@ -7,9 +7,9 @@ Models
   yolov8     : Ultralytics YOLOv8s, 1024 px input
 
 Every model writes COCO-format predictions for val and test (score threshold 0.001,
-max 300 per image) so that revision/evaluate_det.py scores all models identically.
+max 300 per image) so that scripts/evaluate_det.py scores all models identically.
 
-Usage: python revision/train_det.py --model fasterrcnn --scheme mouse_holdout --seed 0 --gpu 1
+Usage: python scripts/train_det.py --model fasterrcnn --scheme mouse_holdout --seed 0 --gpu 1
 """
 
 import argparse
@@ -34,7 +34,7 @@ from torchvision.models.detection.mask_rcnn import MaskRCNNPredictor
 from torchvision.transforms import v2
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from revision.data_paths import data_root, run_root, annotation_file, require_semantic_data
+from murinecyto_det.paths import data_root, run_root, annotation_file, require_semantic_data
 
 NUM_CLASSES = 5
 

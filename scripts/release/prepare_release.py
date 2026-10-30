@@ -78,7 +78,7 @@ def prepare(source, out):
              "primary_split": {"train": 242, "val": 47, "test": 44},
              "empty_mask_evidence": "Author-confirmed; the seven excluded mask images are not included in the public release."}
     write_json(out / "annotation_audit.json", audit)
-    docs = Path(__file__).resolve().parents[1] / "docs"
+    docs = Path(__file__).resolve().parents[2] / "docs"
     for name in ("DATA_README.md", "DATA_CHANGELOG.md"):
         shutil.copy2(docs / name, out / ("README.md" if name == "DATA_README.md" else "CHANGELOG.md"))
     (out / "LICENSE.txt").write_text("Dataset license: Creative Commons Attribution 4.0 International (CC BY 4.0).\nhttps://creativecommons.org/licenses/by/4.0/legalcode\nAttribute MurineCyto-Det and its authors when reusing the data.\n")

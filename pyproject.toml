@@ -1,7 +1,7 @@
 [project]
-name = "paper-2025-murinecyto-det"
+name = "murinecyto-det"
 version = "0.1.0"
-description = "Add your description here"
+description = "MurineCyto-Det: mouse-level benchmark for murine BAL cytology segmentation and detection"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

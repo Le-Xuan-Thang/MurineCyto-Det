@@ -6,8 +6,8 @@ import json
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from revision.data_paths import data_root
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from murinecyto_det.paths import data_root
 
 COUNTS = {1: 5724, 2: 4154, 3: 388, 4: 51, 5: 4227}
 

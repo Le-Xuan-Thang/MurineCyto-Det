@@ -25,7 +25,7 @@ from pycocotools.coco import COCO
 
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from revision.data_paths import data_root, run_root, annotation_file, require_semantic_data
+from murinecyto_det.paths import data_root, run_root, annotation_file, require_semantic_data
 
 CLASSES = ["Background", "Macrophage/Monocyte", "Neutrophil", "Eosinophil", "Lymphocyte", "Unknown cell/Debris"]
 K = len(CLASSES)
