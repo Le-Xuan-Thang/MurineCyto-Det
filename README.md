@@ -1,6 +1,6 @@
-# MurineCyto-Det — revised benchmark
+# MurineCyto-Det dataset
 
-This repository contains the pipeline for the completed revised experiments. The primary benchmark is the fixed **mouse-level 242/47/44 split**. Per-image annotation files are exported from the v2 full-instance COCO annotations with `scripts/export_per_image.py`.
+This repository contains the pipeline for the completed experiments of MurineCyto-Det dataset. The benchmark is the fixed **mouse-level 242/47/44 split**. Per-image annotation files are exported from the full-instance COCO annotations with `scripts/export_per_image.py`.
 
 ## Repository layout
 
@@ -27,7 +27,8 @@ The supplied `uv.lock` is the revision lockfile (PyTorch 2.11.0 / torchvision 0.
 
 ## Data
 
-Download **data_v2.zip** from the v2 Zenodo version linked by the manuscript, and extract it into the repository root. The archive contains one top-level `data_v2/` directory. No Hugging Face token or Labelbox account is required to use the public release.
+Dataset is available at: [10.5281/zenodo.23734073](https://doi.org/10.5281/zenodo.23734073) CC BY 4.0.
+Download **data_v2.zip** from the v2 Zenodo version linked by the manuscript, and extract it into the repository root. The archive contains one top-level `data_v2/` directory.
 
 ```sh
 uv run python scripts/release/validate_release.py --data-dir data_v2 --check-hashes --check-masks
@@ -66,7 +67,7 @@ For a separately labeled sensitivity analysis using original Labelbox masks:
 uv run python scripts/evaluate_det.py --data-dir data_v2 --runs-dir runs_revision --scheme mouse_holdout --annotation-set original --results-dir runs_revision/results_original_masks
 ```
 
-This does not modify the saved predictions or the reported reference CSVs. The historical `random_tile` comparison remains available with explicit `--scheme random_tile`; it is not the primary benchmark. Figure-generation commands are documented in [REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md).
+This does not modify the saved predictions or the reported reference CSVs. The historical `random_tile` comparison remains available with explicit `--scheme random_tile`; it is not the primary benchmark. 
 
 ## Rebuild the data release (maintainers only)
 
@@ -75,7 +76,3 @@ uv run python scripts/release/prepare_release.py --source-code-dir /path/to/loca
 ```
 
 The source must contain the existing `data/` and `data_v2/annotations/instances_labelbox.json`. Output must be a new directory. The script copies existing scientific data without changing masks, split membership or class labels, and strips private Labelbox identifiers/URLs.
-
-## Distribution
-
-Dataset: CC BY 4.0. This README does not grant a new software license for pre-existing code; retain the repository's existing licensing policy. Do not commit datasets, model weights, private exports or credentials to Git. Publish large reproducibility artifacts with Zenodo/Hugging Face and cite the final version DOI/release tag in the manuscript when ready.
